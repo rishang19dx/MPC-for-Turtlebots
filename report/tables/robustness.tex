@@ -1,7 +1,7 @@
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering\small
 \caption{Robustness sweeps on random splines: median position RMSE [mm] (30 paired seeds per cell). Perturbations act on the plant only.}\label{tab:robustness}
-\resizebox{\linewidth}{!}{%
+\begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{llrrrrr}
 \toprule
 perturbation & level & NMPC & Kanayama & Samson & SMC & NMPC + delay comp. \\
@@ -24,5 +24,6 @@ initial offset [m] & 0.1 & \textbf{0.14} & 0.58 & 0.64 & 0.23 & -- \\
 initial offset [m] & 0.2 & \textbf{0.15} & 0.60 & 0.69 & 0.24 & -- \\
 initial offset [m] & 0.4 & \textbf{0.22} & 4.91 & 1.74 & 20.67 & -- \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{adjustbox}
 \end{table}

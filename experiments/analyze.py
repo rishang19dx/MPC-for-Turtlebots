@@ -358,10 +358,11 @@ def _tex_table(path, caption, label, colspec, header, rows, note=None):
     body = "\n".join(" & ".join(r) + r" \\" for r in rows)
     note_tex = f"\n\\par\\smallskip\\footnotesize {note}" if note else ""
     path.write_text(
-        "\\begin{table}[t]\n\\centering\\small\n"
+        "\\begin{table}[!htbp]\n\\centering\\small\n"
         f"\\caption{{{caption}}}\\label{{{label}}}\n"
-        f"\\resizebox{{\\linewidth}}{{!}}{{%\n\\begin{{tabular}}{{{colspec}}}\n\\toprule\n"
-        f"{header} \\\\\n\\midrule\n{body}\n\\bottomrule\n\\end{{tabular}}}}{note_tex}\n\\end{{table}}\n")
+        # adjustbox max width only ever shrinks (resizebox would blow narrow tables up)
+        f"\\begin{{adjustbox}}{{max width=\\linewidth}}\n\\begin{{tabular}}{{{colspec}}}\n\\toprule\n"
+        f"{header} \\\\\n\\midrule\n{body}\n\\bottomrule\n\\end{{tabular}}\n\\end{{adjustbox}}{note_tex}\n\\end{{table}}\n")
     print(f"  report table {path.name}")
 
 
@@ -479,8 +480,11 @@ def report_assets():
     if tuned.exists():
         import json
         t = json.loads(tuned.read_text())
+        symbols = {"k_x": "k_x", "k_y": "k_y", "zeta": r"\zeta", "b": "b", "k2": "k_2", "k3": "k_3",
+                   "phi": r"\phi", "q_xy": "q_{xy}", "q_th": r"q_\theta", "r_v": "r_v", "s_v": "s_v"}
+
         def fmt_param(p, v):
-            return "$" + p.replace("_", r"\_") + f"={v:g}$"
+            return "$" + symbols.get(p, p.replace("_", r"\_")) + f"={v:g}$"
 
         rows = [[LABELS[k], ", ".join(fmt_param(p, v) for p, v in b["params"].items()),
                  f"{1e3 * b['median_rmse']:.2f}"] for k, b in t.items()]

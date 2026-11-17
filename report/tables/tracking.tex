@@ -1,7 +1,7 @@
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering\small
 \caption{Obstacle-free tracking: median position RMSE and median max error over 30 paired seeds (mm, $t\in[5\,\mathrm{s},T_{\mathrm{ref}}]$). Best in bold.}\label{tab:tracking}
-\resizebox{\linewidth}{!}{%
+\begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lrrrrrrrr}
 \toprule
 & \multicolumn{4}{c}{RMSE [mm]} & \multicolumn{4}{c}{max error [mm]} \\
@@ -15,6 +15,7 @@ lissajous & \textbf{0.06}$^{*}$ & 0.27 & 1.74 & 0.47 & \textbf{0.94} & 1.65 & 9.
 random spline & \textbf{0.15}$^{*}$ & 0.60 & 0.68 & 0.24 & \textbf{0.62} & 4.88 & 4.41 & 2.18 \\
 point to point & \textbf{0.31}$^{*}$ & 1.37 & 1.87 & 0.72 & \textbf{1.05} & 6.02 & 6.70 & 3.97 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{adjustbox}
 \par\smallskip\footnotesize $^{*}$ NMPC significantly better than every baseline; $^{\dagger}$ at least one baseline significantly better than NMPC (paired Wilcoxon signed-rank, Holm-corrected, $p<0.05$).
 \end{table}

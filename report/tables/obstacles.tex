@@ -1,7 +1,7 @@
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering\small
 \caption{Obstacle scenarios (2 LiDAR-perceived obstacles, 30 paired seeds per family). Clearance is the median minimum distance between robot footprint and true obstacle boundary.}\label{tab:obstacles}
-\resizebox{\linewidth}{!}{%
+\begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lrrrrrr}
 \toprule
 & \multicolumn{3}{c}{random spline} & \multicolumn{3}{c}{point-to-point} \\
@@ -15,5 +15,6 @@ Kanayama + CBF-QP & 53 & 0 & 6.8 & 0 & 0 & 7.4 \\
 Samson + CBF-QP & 57 & 0 & 6.9 & 0 & 0 & 7.3 \\
 SMC + CBF-QP & 50 & 0 & 7.1 & 7 & 0 & 7.4 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{adjustbox}
 \end{table}

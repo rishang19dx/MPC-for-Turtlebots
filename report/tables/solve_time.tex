@@ -1,7 +1,7 @@
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering\small
 \caption{Warm-started NMPC solve times (IPOPT, serial, Intel i5-1240P); first (cold) solve excluded. Random splines, 2 obstacles for CBF rows.}\label{tab:solvetime}
-\resizebox{\linewidth}{!}{%
+\begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lrrrrrrrr}
 \toprule
 configuration & $N$ & solves & mean & median & p95 & p99 & max [ms] & misses [\%] \\
@@ -11,5 +11,6 @@ NMPC-CBF & 10 & 6254 & 7.4 & 6.7 & 11.1 & 15.8 & 28.3 & 0.0 \\
 NMPC-CBF & 20 & 6254 & 11.2 & 10.1 & 16.1 & 20.8 & 82.2 & 0.0 \\
 NMPC-CBF & 30 & 6254 & 14.7 & 13.1 & 21.1 & 24.0 & 41.0 & 0.0 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{adjustbox}
 \end{table}

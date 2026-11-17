@@ -1,15 +1,16 @@
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering\small
 \caption{Frozen gains after equal-budget tuning (24 candidates per controller, held-out seeds).}\label{tab:gains}
-\resizebox{\linewidth}{!}{%
+\begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{llr}
 \toprule
 controller & tuned parameters & tuning RMSE [mm] \\
 \midrule
-Kanayama & $k\_x=2$, $k\_y=200$ & 1.73 \\
-Samson / backstepping & $zeta=1.2$, $b=120$ & 2.30 \\
-Kinematic SMC & $k2=8$, $k3=2$, $phi=0.02$ & 0.65 \\
-NMPC & $q\_xy=30$, $q\_th=0.5$, $r\_v=0.1$, $s\_v=0.3$ & 0.22 \\
+Kanayama & $k_x=2$, $k_y=200$ & 1.73 \\
+Samson / backstepping & $\zeta=1.2$, $b=120$ & 2.30 \\
+Kinematic SMC & $k_2=8$, $k_3=2$, $\phi=0.02$ & 0.65 \\
+NMPC & $q_{xy}=30$, $q_\theta=0.5$, $r_v=0.1$, $s_v=0.3$ & 0.22 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{adjustbox}
 \end{table}
