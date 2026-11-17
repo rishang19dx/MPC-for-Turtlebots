@@ -1,0 +1,130 @@
+% AR-521 end-semester project report. Compile on Overleaf (pdfLaTeX + BibTeX).
+% Upload this folder together with ../results/figures and ../results/tables.
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx,booktabs,siunitx,hyperref,cleveref,caption,subcaption}
+\usepackage[numbers]{natbib}
+\graphicspath{{figures/}{../results/figures/}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\wrap}{\operatorname{wrap}}
+
+\title{Trajectory Tracking Control of a TurtleBot3 using\\Nonlinear Model Predictive Control with Obstacle Avoidance}
+\author{AR-521 Control for Robotic Systems --- End-Semester Project}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We design, implement and evaluate a nonlinear model predictive controller (NMPC) for trajectory tracking of a TurtleBot3 Burger differential-drive robot with on-line obstacle avoidance from 2D LiDAR. The NMPC uses a multiple-shooting transcription of the unicycle model, the robot's coupled wheel-speed limits, rate limits and discrete-time control-barrier-function (CBF) obstacle constraints with exact-penalty slacks, solved with IPOPT at \SI{10}{Hz}. The controller runs unchanged in a kinematic simulator, in Gazebo and on hardware through ROS~2. We compare it against Kanayama's controller, the Samson law (equivalent to kinematic backstepping) and a kinematic sliding-mode controller, all subject to identical saturation, sampling, state feedback and tuning budget, in a paired Monte Carlo study over randomized trajectories, initial poses and obstacles, with robustness sweeps over delay, noise and model mismatch. % TODO: one sentence with the headline numbers from results/tables.
+\end{abstract}
+
+\section{Introduction}
+% Problem statement items -> where they are addressed:
+% initial & goal positions vary -> random offsets + point-to-point (Sec. 6)
+% random & desired trajectories -> flatness-based families + random splines (Sec. 3)
+% obstacle avoidance -> CBF constraints + LiDAR pipeline (Sec. 5)
+% modelling & formulation -> Sec. 2, 4
+% sensor acquisition & feedback -> Sec. 5-6 (odometry, LiDAR, delay compensation)
+Contributions: (i) an NMPC formulation that respects the Burger's true (coupled) actuator limits and encodes obstacles as discrete-time CBF constraints~\cite{zeng2021mpccbf}; (ii) a sim--Gazebo--hardware pipeline sharing one tested core; (iii) a fair, statistically tested comparison against three classical nonlinear tracking laws~\cite{kanayama1990,samson1995,elyoussef2014}.
+
+\section{Modelling}
+\subsection{Kinematics}
+With pose $\bm{x}=[x,\,y,\,\theta]^\top$ in the \texttt{odom} frame and body-frame input $\bm{u}=[v,\,\omega]^\top$,
+\begin{equation}
+\dot{\bm{x}} = f(\bm{x},\bm{u}) = \begin{bmatrix} v\cos\theta \\ v\sin\theta \\ \omega \end{bmatrix}. \label{eq:unicycle}
+\end{equation}
+The model is nonholonomic ($\dot x\sin\theta-\dot y\cos\theta=0$); its linearization about a rest point is not stabilizable by smooth static feedback (Brockett), which motivates time-varying references and nonlinear control.
+
+\subsection{Discretization}
+Zero-order hold with $\Delta t=\SI{0.1}{s}$ and one classical RK4 step, $\bm{x}_{k+1}=F(\bm{x}_k,\bm{u}_k)$. At $v\le\SI{0.22}{m/s}$ the robot moves at most \SI{2.2}{cm} per step.
+
+\subsection{Actuator limits}
+With wheel separation $L=\SI{0.160}{m}$, wheel rim speeds are $v_{R,L}=v\pm\tfrac{L}{2}\omega$ and are limited by $v_w^{\max}=\SI{0.22}{m/s}$, giving the \emph{wheel diamond}
+\begin{equation}
+|v| + \tfrac{L}{2}|\omega| \le v_w^{\max}, \qquad |v|\le 0.22,\ |\omega|\le 2.84, \label{eq:diamond}
+\end{equation}
+which is the binding constraint (e.g.\ at $v=\SI{0.15}{m/s}$, $|\omega|\le\SI{0.875}{rad/s}$). We add rate limits $|\Delta v|\le a_{\max}\Delta t$, $|\Delta\omega|\le\alpha_{\max}\Delta t$ with $a_{\max}=\SI{0.5}{m/s^2}$, $\alpha_{\max}=\SI{3}{rad/s^2}$ (engineering choices; the driver applies no acceleration profile). The same saturation block (rate $\to$ box $\to$ curvature-preserving diamond scaling) is applied to every controller.
+
+\section{Reference generation}
+The position $(x,y)$ is a flat output of \eqref{eq:unicycle}~\cite{oriolo2002}: for any $C^2$ path,
+\begin{equation}
+\theta_r=\operatorname{atan2}(\dot y_r,\dot x_r),\quad v_r=\sqrt{\dot x_r^2+\dot y_r^2},\quad \omega_r=\frac{\dot x_r\ddot y_r-\dot y_r\ddot x_r}{\dot x_r^2+\dot y_r^2}.
+\end{equation}
+Families: circle, Gerono lemniscate (figure-8), sinusoid, a time-scaled Lissajous curve, \emph{random splines} (5--8 seeded waypoints in a \SI{3x3}{m} arena, natural cubic spline on chord length, curvature-limited) and \emph{point-to-point} (rest-to-rest cubic B\'ezier between random start/goal poses). Path-based references are time-parameterized with $v(s)=\min\{0.8v_{\max},\,0.8\omega_{\max}/|\kappa|,\,0.8v_w^{\max}/(1+\tfrac L2|\kappa|)\}$ and forward/backward acceleration passes, leaving 20\% feedback headroom.
+
+\section{Controllers}
+\subsection{Tracking error}
+All controllers use the robot-frame error~\cite{kanayama1990}
+$\bm{e}=[e_x,e_y,e_\theta]^\top$, $[e_x,e_y]^\top=R(\theta)^\top(\bm p_r-\bm p)$, $e_\theta=\wrap(\theta_r-\theta)$, with dynamics
+$\dot e_x=\omega e_y-v+v_r\cos e_\theta$, $\dot e_y=-\omega e_x+v_r\sin e_\theta$, $\dot e_\theta=\omega_r-\omega$.
+
+\subsection{Nonlinear MPC}
+At each sample, with measured (or delay-compensated) state $\hat{\bm x}$, previous input $\bm u_{-1}$ and obstacle circles $\{(\bm c_j,r_j)\}_{j=1}^{M}$ (inflated by robot radius and margin):
+\begin{align}
+\min_{\bm X,\bm U,\bm S}\ & \sum_{k=0}^{N-1}\Big[\|\bm p_k-\bm p_k^r\|^2_{Q}+2q_\theta(1-\cos(\theta_k-\theta^r_k))+\|\bm u_k-\bm u^r_k\|^2_R+\|\bm u_k-\bm u_{k-1}\|^2_{S}\Big] \nonumber\\
+&+\|\bm p_N-\bm p_N^r\|^2_{P}+2p_\theta(1-\cos(\theta_N-\theta^r_N)) + \rho\,\mathbf{1}^\top\bm S \label{eq:cost}\\
+\text{s.t.}\ & \bm x_0=\hat{\bm x},\quad \bm x_{k+1}=F(\bm x_k,\bm u_k),\quad \eqref{eq:diamond},\ \text{rate limits},\nonumber\\
+& h_j(\bm x_{k+1})\ge(1-\gamma)\,h_j(\bm x_k)-s_{j,k},\quad s_{j,k}\ge0,\quad k=0,\dots,N-1,\ j=1,\dots,M, \label{eq:cbf}
+\end{align}
+with $h_j(\bm x)=\|\bm p+\ell[\cos\theta,\sin\theta]^\top-\bm c_j\|^2-r_j^2$. Design choices and their reasons:
+\begin{itemize}
+\item $1-\cos$ heading cost: smooth, $2\pi$-periodic, no wrap discontinuity.
+\item Penalizing $\bm u-\bm u^r$ (not $\bm u$): zero cost for following the flat feed-forward.
+\item Look-ahead $\ell=\SI{5}{cm}$: puts $\theta$ (hence $\omega$) into $h$; otherwise one Euler step of $h$ depends on $v$ only and the CBF can only brake, not steer.
+\item Discrete CBF (\ref{eq:cbf}) vs distance constraint $h_j(\bm x_k)\ge0$: the CBF bounds the decay of the safety margin by $(1-\gamma)$ per step and acts before contact; distance constraints are inactive until the predicted trajectory touches the obstacle~\cite{zeng2021mpccbf}.
+\item Exact L1 penalty $\rho=10^4$: equals the hard-constrained solution whenever that is feasible, but never makes the NLP infeasible (sensor noise, newly seen obstacles).
+\item Terminal cost $P=10Q$ only. Stability results for receding-horizon unicycle tracking use a terminal penalty \emph{and} terminal set~\cite{gu2006}; we omit the set to preserve feasibility near obstacles (as in~\cite{salimi2021}) and verify convergence empirically.
+\end{itemize}
+Implementation: CasADi SX, multiple shooting ($3(N{+}1)+2N+MN$ variables), IPOPT with warm start from the shifted previous primal--dual solution; obstacle slots are a fixed $3\times M$ parameter padded with far-away dummies so the NLP is built once. On solver failure the next input of the previous plan is applied (up to 3 times), then the robot brakes.
+
+\subsection{Baselines}
+\paragraph{Kanayama~\cite{kanayama1990}.} $v=v_r\cos e_\theta+k_xe_x$, $\omega=\omega_r+v_r(k_ye_y+k_\theta\sin e_\theta)$, $k_\theta=2\sqrt{k_y}$. With $V=\tfrac12(e_x^2+e_y^2)+(1-\cos e_\theta)/k_y$: $\dot V=-k_xe_x^2-\tfrac{v_rk_\theta}{k_y}\sin^2e_\theta\le0$ (needs $v_r>0$).
+\paragraph{Samson / kinematic backstepping~\cite{samson1995,jiang1997}.} $v=v_r\cos e_\theta+k_1e_x$, $\omega=\omega_r+k_2v_r\operatorname{sinc}(e_\theta)e_y+k_3e_\theta$, $k_1=k_3=2\zeta\sqrt{\omega_r^2+bv_r^2}$, $k_2=b$; $V=\tfrac{k_2}{2}(e_x^2+e_y^2)+\tfrac12e_\theta^2$, $\dot V=-k_1k_2e_x^2-k_3e_\theta^2$. At the kinematic level backstepping reduces to this law, so we count it once.
+\paragraph{Kinematic SMC~\cite{elyoussef2014}.} Surfaces $s_v=k_1e_x$, $s_\omega=k_2e_y+k_3\sin(e_\theta/2)$, reaching law $\dot s=-K\operatorname{sat}(s/\phi)-Ps$, giving
+$\omega=\big[k_2v_r\sin e_\theta+\tfrac{k_3}{2}\cos\tfrac{e_\theta}{2}\,\omega_r+K_\omega\operatorname{sat}(s_\omega/\phi)+P_\omega s_\omega\big]/\big[k_2e_x+\tfrac{k_3}{2}\cos\tfrac{e_\theta}{2}\big]$ and
+$v=\omega e_y+v_r\cos e_\theta+[K_v\operatorname{sat}(s_v/\phi)+P_vs_v]/k_1$ (denominator guarded). The torque-level SMC of~\cite{yang1999} is unnecessary for a velocity-commanded robot.
+\paragraph{Obstacles for baselines.} Classical trackers have no obstacle model, so in obstacle runs each is wrapped in a CBF-QP safety filter with the same barrier: $\min_{\bm u}\|\bm u-\bm u_{\text{nom}}\|_W^2$ s.t.\ $\dot h_j\ge-\alpha h_j$, box and diamond limits.
+
+\section{System architecture, sensing and feedback}
+% Figure: node graph (PLAN.md ASCII -> draw.io / TikZ)
+\begin{itemize}
+\item \textbf{State feedback:} \texttt{/odom} (wheel encoders, IMU heading fusion inside \texttt{turtlebot3\_node}; $\approx$\SI{20}{Hz}).
+\item \textbf{Obstacle sensing:} \texttt{/scan} (LDS, \SI{5}{Hz}, 360 beams) $\to$ invalid-beam masking (0 and $\infty$) $\to$ adaptive-breakpoint segmentation~\cite{borges2004} with wrap-around merge $\to$ chunking of long segments $\to$ Kåsa least-squares circle fit $\to$ tf2 transform to \texttt{odom} at the scan timestamp $\to$ inflation $\to$ $K$ nearest.
+\item \textbf{Delay compensation:} the controller integrates \eqref{eq:unicycle} from the odometry stamp to $t_{\text{now}}+\tau$ through the commands already sent, and plans from that predicted state.
+\item \textbf{Safety layers:} stale-odometry/obstacle watchdogs, forward-sector proximity stop, \texttt{/estop}, and an on-robot \texttt{cmd\_vel} relay with a \SI{0.3}{s} timeout (the TurtleBot3 driver has none).
+\end{itemize}
+
+\section{Experimental protocol}
+Three tiers: (1) kinematic simulator --- statistical bulk; (2) Gazebo with encoder odometry and p3d ground truth --- confirmation and obstacle scenarios; (3) hardware --- demonstration runs with taped ground truth. Paired design: seed $s$ fixes the reference (random families), initial offset ($\pm\SI{0.2}{m}$, $\pm\pi/6$), noise sequence and obstacles; every controller sees the same seed ($M=30$ per cell). Gains of \emph{all} controllers were tuned with the same budget (24 grid points) on held-out seeds and frozen. Metrics: RMSE / max position error over $t\in[\SI{5}{s},T_{\text{ref}}]$, heading RMSE, IAE, control effort and smoothness, saturation \%, min clearance, collisions, success, and solve-time statistics. Statistics: median [IQR], 95\% bootstrap CI, paired Wilcoxon signed-rank tests with Holm correction.
+
+\section{Results}
+\subsection{Obstacle-free tracking}
+\begin{figure}[h]\centering\includegraphics[width=\linewidth]{tracking_rmse_box.pdf}\caption{Position RMSE per reference family over 30 paired seeds.}\end{figure}
+\begin{figure}[h]\centering\includegraphics[width=\linewidth]{tracking_xy.pdf}\caption{Example trajectories (seed 0).}\end{figure}
+% \input{../results/tables/tracking_summary.tex}  \input{../results/tables/tracking_wilcoxon.tex}
+\subsection{Robustness}
+\begin{figure}[h]\centering\includegraphics[width=\linewidth]{robustness_degradation.pdf}\caption{Degradation curves: median RMSE (IQR band) vs perturbation level.}\end{figure}
+\subsection{Obstacle avoidance}
+\begin{figure}[h]\centering\includegraphics[width=0.85\linewidth]{obstacles_clearance.pdf}\caption{Minimum clearance to the true obstacle boundary.}\end{figure}
+\subsection{Ablations and computation}
+\begin{figure}[h]\centering
+\includegraphics[width=0.49\linewidth]{ablation_horizon.pdf}\hfill
+\includegraphics[width=0.49\linewidth]{ablation_gamma.pdf}
+\caption{Horizon ablation (left) and obstacle-constraint ablation (right).}\end{figure}
+\begin{figure}[h]\centering\includegraphics[width=0.6\linewidth]{solve_time_cdf.pdf}\caption{Empirical CDF of NMPC solve times.}\end{figure}
+\subsection{Gazebo and hardware}
+% Table: sim vs Gazebo vs hardware for the same reference; measured /odom rate, scan rate, latency, odometry drift vs tape.
+
+\section{Discussion and limitations}
+% Where NMPC wins (preview, constraints, obstacles) and where it does not (model mismatch, compute).
+% Obstacle advantage comes from prediction + constraints, not tracking quality.
+% Terminal-set gap vs theory; CBF persistent feasibility is open; static obstacles only;
+% odometry-only localization -> drift; LiDAR circle model for walls.
+
+\section{Conclusion}
+
+\bibliographystyle{unsrtnat}
+\bibliography{refs}
+\end{document}

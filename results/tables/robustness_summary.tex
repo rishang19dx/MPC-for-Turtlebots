@@ -1,0 +1,81 @@
+\begin{table}
+\caption{Robustness sweeps (median RMSE [m], success %)}
+\label{tab:robustness_summary}
+\begin{tabular}{lrlrr}
+\toprule
+perturbation & level & variant & rmse & success \\
+\midrule
+delay\_steps & 0 & Kanayama & 0.0005974 & 100 \\
+delay\_steps & 0 & NMPC & 0.0001468 & 100 \\
+delay\_steps & 0 & Samson / backstepping & 0.0006756 & 100 \\
+delay\_steps & 0 & Kinematic SMC & 0.0002365 & 100 \\
+delay\_steps & 1 & Kanayama & 0.001552 & 100 \\
+delay\_steps & 1 & NMPC & 0.0005967 & 100 \\
+delay\_steps & 1 & NMPC + delay comp. & 0.0001522 & 100 \\
+delay\_steps & 1 & Samson / backstepping & 0.001404 & 100 \\
+delay\_steps & 1 & Kinematic SMC & 0.001896 & 100 \\
+delay\_steps & 2 & Kanayama & 0.0168 & 100 \\
+delay\_steps & 2 & NMPC & 0.001686 & 100 \\
+delay\_steps & 2 & NMPC + delay comp. & 0.0001637 & 100 \\
+delay\_steps & 2 & Samson / backstepping & 0.002705 & 100 \\
+delay\_steps & 2 & Kinematic SMC & 0.007869 & 100 \\
+delay\_steps & 4 & Kanayama & 0.2667 & 93 \\
+delay\_steps & 4 & NMPC & 0.2461 & 100 \\
+delay\_steps & 4 & NMPC + delay comp. & 0.0001795 & 100 \\
+delay\_steps & 4 & Samson / backstepping & 0.1199 & 100 \\
+delay\_steps & 4 & Kinematic SMC & 0.05887 & 100 \\
+noise & 0 & Kanayama & 0.0005974 & 100 \\
+noise & 0 & NMPC & 0.0001468 & 100 \\
+noise & 0 & Samson / backstepping & 0.0006756 & 100 \\
+noise & 0 & Kinematic SMC & 0.0002365 & 100 \\
+noise & 0.005 & Kanayama & 0.002367 & 100 \\
+noise & 0.005 & NMPC & 0.003205 & 100 \\
+noise & 0.005 & Samson / backstepping & 0.002977 & 100 \\
+noise & 0.005 & Kinematic SMC & 0.003716 & 100 \\
+noise & 0.01 & Kanayama & 0.004847 & 100 \\
+noise & 0.01 & NMPC & 0.006565 & 100 \\
+noise & 0.01 & Samson / backstepping & 0.005901 & 100 \\
+noise & 0.01 & Kinematic SMC & 0.007146 & 100 \\
+noise & 0.02 & Kanayama & 0.01206 & 100 \\
+noise & 0.02 & NMPC & 0.01406 & 100 \\
+noise & 0.02 & Samson / backstepping & 0.01225 & 100 \\
+noise & 0.02 & Kinematic SMC & 0.01409 & 100 \\
+offset & 0.1 & Kanayama & 0.000581 & 100 \\
+offset & 0.1 & NMPC & 0.0001376 & 100 \\
+offset & 0.1 & Samson / backstepping & 0.0006438 & 100 \\
+offset & 0.1 & Kinematic SMC & 0.0002338 & 100 \\
+offset & 0.2 & Kanayama & 0.0005994 & 100 \\
+offset & 0.2 & NMPC & 0.0001469 & 100 \\
+offset & 0.2 & Samson / backstepping & 0.0006891 & 100 \\
+offset & 0.2 & Kinematic SMC & 0.0002414 & 100 \\
+offset & 0.4 & Kanayama & 0.004906 & 100 \\
+offset & 0.4 & NMPC & 0.0002182 & 100 \\
+offset & 0.4 & Samson / backstepping & 0.001742 & 100 \\
+offset & 0.4 & Kinematic SMC & 0.02067 & 100 \\
+wheel\_asym & 0 & Kanayama & 0.0005974 & 100 \\
+wheel\_asym & 0 & NMPC & 0.0001468 & 100 \\
+wheel\_asym & 0 & Samson / backstepping & 0.0006756 & 100 \\
+wheel\_asym & 0 & Kinematic SMC & 0.0002365 & 100 \\
+wheel\_asym & 0.02 & Kanayama & 0.001385 & 100 \\
+wheel\_asym & 0.02 & NMPC & 0.002639 & 100 \\
+wheel\_asym & 0.02 & Samson / backstepping & 0.002169 & 100 \\
+wheel\_asym & 0.02 & Kinematic SMC & 0.0003888 & 100 \\
+wheel\_asym & 0.05 & Kanayama & 0.003163 & 100 \\
+wheel\_asym & 0.05 & NMPC & 0.006592 & 100 \\
+wheel\_asym & 0.05 & Samson / backstepping & 0.005167 & 100 \\
+wheel\_asym & 0.05 & Kinematic SMC & 0.0007944 & 100 \\
+wheel\_sym & 0 & Kanayama & 0.0005974 & 100 \\
+wheel\_sym & 0 & NMPC & 0.0001468 & 100 \\
+wheel\_sym & 0 & Samson / backstepping & 0.0006756 & 100 \\
+wheel\_sym & 0 & Kinematic SMC & 0.0002365 & 100 \\
+wheel\_sym & 0.05 & Kanayama & 0.004349 & 100 \\
+wheel\_sym & 0.05 & NMPC & 0.001834 & 100 \\
+wheel\_sym & 0.05 & Samson / backstepping & 0.002062 & 100 \\
+wheel\_sym & 0.05 & Kinematic SMC & 0.001457 & 100 \\
+wheel\_sym & 0.1 & Kanayama & 0.009197 & 100 \\
+wheel\_sym & 0.1 & NMPC & 0.003464 & 100 \\
+wheel\_sym & 0.1 & Samson / backstepping & 0.004242 & 100 \\
+wheel\_sym & 0.1 & Kinematic SMC & 0.003072 & 100 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,61 @@
+# Shared parameters for sim and real runs. Launch files override run-specific
+# values (controller, reference, offsets, topics). Controller gains are the frozen
+# equal-budget tuning results (experiments/tune_controllers.py -> results/tuned_gains.json).
+/**:
+  ros__parameters:
+    # ---------------- tracking_controller
+    rate_hz: 10.0
+    odom_timeout: 0.3
+    obstacle_timeout: 0.6
+    proximity_stop_distance: 0.13
+    proximity_sector_deg: 30.0
+    hold_after_end: 3.0
+
+    nmpc:
+      N: 20
+      q_xy: 30.0
+      q_th: 0.5
+      r_v: 0.1
+      r_w: 0.05
+      s_v: 0.3
+      s_w: 0.1
+      terminal_factor: 10.0
+      obstacle_mode: "cbf"      # none | dc | cbf | pf
+      max_obstacles: 8
+      gamma: 0.2
+      lookahead: 0.05
+      slack_weight: 10000.0
+      max_iter: 100
+      tol: 0.0001
+      max_wall_time: 0.08       # s; must stay below the control period
+
+    kanayama:
+      k_x: 2.0
+      k_y: 200.0
+
+    samson:
+      zeta: 1.2
+      b: 120.0
+
+    smc:
+      k1: 1.0
+      k2: 8.0
+      k3: 2.0
+      K_v: 0.1
+      K_w: 0.3
+      P_v: 1.0
+      P_w: 2.0
+      phi: 0.02
+
+    # ---------------- obstacle_extractor
+    fixed_frame: "odom"
+    inflation_margin: 0.05
+    max_obstacles: 8
+    lidar:
+      lambda_deg: 10.0
+      sigma_r: 0.01
+      min_points: 3
+      max_segment_len: 0.4
+      r_min: 0.05
+      r_max: 0.5
+      max_range: 3.0

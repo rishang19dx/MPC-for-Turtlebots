@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# colcon (if ever built in-tree)
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# large generated artifacts (regenerate with experiments/*.py)
+results/traces/
+results/benchmark_run*.log
+
+# report build
+report/*.aux
+report/*.log
+report/*.out
+report/*.synctex.gz
+report/*.fdb_latexmk
+report/*.fls

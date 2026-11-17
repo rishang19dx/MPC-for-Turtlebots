@@ -1,0 +1,61 @@
+\begin{table}
+\caption{Paired Wilcoxon per robustness cell, Holm-corrected}
+\label{tab:robustness_wilcoxon}
+\begin{tabular}{llrrlrrr}
+\toprule
+cell & comparison & n & median diff (rmse\_pos) & NMPC better in & p & p (Holm) & significant \\
+\midrule
+delay\_steps=0.0 & NMPC vs Kanayama & 30 & -0.0004421 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=0.0 & NMPC vs Samson / backstepping & 30 & -0.0005258 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=0.0 & NMPC vs Kinematic SMC & 30 & -8.143e-05 & 97\% & 3.725e-09 & 9.499e-08 & True \\
+delay\_steps=1.0 & NMPC vs Kanayama & 30 & -0.0009035 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=1.0 & NMPC vs Samson / backstepping & 30 & -0.0007894 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=1.0 & NMPC vs Kinematic SMC & 30 & -0.001297 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=2.0 & NMPC vs Kanayama & 30 & -0.01513 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=2.0 & NMPC vs Samson / backstepping & 30 & -0.0009723 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=2.0 & NMPC vs Kinematic SMC & 30 & -0.006303 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=4.0 & NMPC vs Kanayama & 30 & -0.01684 & 53\% & 0.1004 & 0.2008 & False \\
+delay\_steps=4.0 & NMPC vs Samson / backstepping & 30 & 0.1195 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+delay\_steps=4.0 & NMPC vs Kinematic SMC & 30 & 0.1926 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.0 & NMPC vs Kanayama & 30 & -0.0004421 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.0 & NMPC vs Samson / backstepping & 30 & -0.0005258 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.0 & NMPC vs Kinematic SMC & 30 & -8.143e-05 & 97\% & 3.725e-09 & 9.499e-08 & True \\
+noise=0.005 & NMPC vs Kanayama & 30 & 0.0008432 & 7\% & 4.422e-06 & 2.211e-05 & True \\
+noise=0.005 & NMPC vs Samson / backstepping & 30 & 0.0002085 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.005 & NMPC vs Kinematic SMC & 30 & -0.0005247 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.01 & NMPC vs Kanayama & 30 & 0.001567 & 3\% & 1.304e-08 & 9.499e-08 & True \\
+noise=0.01 & NMPC vs Samson / backstepping & 30 & 0.0006009 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.01 & NMPC vs Kinematic SMC & 30 & -0.0006024 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.02 & NMPC vs Kanayama & 30 & 0.002135 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.02 & NMPC vs Samson / backstepping & 30 & 0.001778 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+noise=0.02 & NMPC vs Kinematic SMC & 30 & -0.0001392 & 53\% & 0.5425 & 0.5425 & False \\
+offset=0.1 & NMPC vs Kanayama & 30 & -0.0004389 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+offset=0.1 & NMPC vs Samson / backstepping & 30 & -0.0004943 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+offset=0.1 & NMPC vs Kinematic SMC & 30 & -8.012e-05 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+offset=0.2 & NMPC vs Kanayama & 30 & -0.0004399 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+offset=0.2 & NMPC vs Samson / backstepping & 30 & -0.000524 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+offset=0.2 & NMPC vs Kinematic SMC & 30 & -8.555e-05 & 97\% & 9.313e-09 & 9.499e-08 & True \\
+offset=0.4 & NMPC vs Kanayama & 30 & -0.001054 & 97\% & 5.588e-09 & 9.499e-08 & True \\
+offset=0.4 & NMPC vs Samson / backstepping & 30 & -0.0007263 & 97\% & 1.304e-08 & 9.499e-08 & True \\
+offset=0.4 & NMPC vs Kinematic SMC & 30 & -0.001863 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_asym=0.0 & NMPC vs Kanayama & 30 & -0.0004421 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_asym=0.0 & NMPC vs Samson / backstepping & 30 & -0.0005258 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_asym=0.0 & NMPC vs Kinematic SMC & 30 & -8.143e-05 & 97\% & 3.725e-09 & 9.499e-08 & True \\
+wheel\_asym=0.02 & NMPC vs Kanayama & 30 & 0.001263 & 3\% & 3.725e-09 & 9.499e-08 & True \\
+wheel\_asym=0.02 & NMPC vs Samson / backstepping & 30 & 0.0004726 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_asym=0.02 & NMPC vs Kinematic SMC & 30 & 0.00225 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_asym=0.05 & NMPC vs Kanayama & 30 & 0.003441 & 3\% & 3.725e-09 & 9.499e-08 & True \\
+wheel\_asym=0.05 & NMPC vs Samson / backstepping & 30 & 0.001422 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_asym=0.05 & NMPC vs Kinematic SMC & 30 & 0.005787 & 0\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_sym=0.0 & NMPC vs Kanayama & 30 & -0.0004421 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_sym=0.0 & NMPC vs Samson / backstepping & 30 & -0.0005258 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_sym=0.0 & NMPC vs Kinematic SMC & 30 & -8.143e-05 & 97\% & 3.725e-09 & 9.499e-08 & True \\
+wheel\_sym=0.05 & NMPC vs Kanayama & 30 & -0.00252 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_sym=0.05 & NMPC vs Samson / backstepping & 30 & -0.0002371 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_sym=0.05 & NMPC vs Kinematic SMC & 30 & 0.0003736 & 7\% & 0.0001529 & 0.0006115 & True \\
+wheel\_sym=0.1 & NMPC vs Kanayama & 30 & -0.005713 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_sym=0.1 & NMPC vs Samson / backstepping & 30 & -0.0007942 & 100\% & 1.863e-09 & 9.499e-08 & True \\
+wheel\_sym=0.1 & NMPC vs Kinematic SMC & 30 & 0.00036 & 17\% & 0.05769 & 0.1731 & False \\
+\bottomrule
+\end{tabular}
+\end{table}
