@@ -350,6 +350,145 @@ def timing():
     write_table(pd.DataFrame(rows).round(2), "solve_time", "NMPC solve-time statistics (warm-started)")
 
 
+# =========================================================================== report assets
+REPORT = ROOT / "report"
+
+
+def _tex_table(path, caption, label, colspec, header, rows, note=None):
+    body = "\n".join(" & ".join(r) + r" \\" for r in rows)
+    note_tex = f"\n\\par\\smallskip\\footnotesize {note}" if note else ""
+    path.write_text(
+        "\\begin{table}[t]\n\\centering\\small\n"
+        f"\\caption{{{caption}}}\\label{{{label}}}\n"
+        f"\\resizebox{{\\linewidth}}{{!}}{{%\n\\begin{{tabular}}{{{colspec}}}\n\\toprule\n"
+        f"{header} \\\\\n\\midrule\n{body}\n\\bottomrule\n\\end{{tabular}}}}{note_tex}\n\\end{{table}}\n")
+    print(f"  report table {path.name}")
+
+
+def _bold_min(vals, fmt):
+    finite = [v for v in vals if np.isfinite(v)]
+    best = min(finite) if finite else None
+    return [("\\textbf{" + fmt(v) + "}") if v == best else fmt(v) for v in vals]
+
+
+def report_assets():
+    """Compact LaTeX tables for report/main.tex and a copy of every figure PDF."""
+    (REPORT / "tables").mkdir(parents=True, exist_ok=True)
+    (REPORT / "figures").mkdir(parents=True, exist_ok=True)
+    for f in FIG.glob("*.pdf"):
+        (REPORT / "figures" / f.name).write_bytes(f.read_bytes())
+    mm = lambda v: f"{1e3 * v:.2f}"  # noqa: E731
+
+    if (RES / "tracking.csv").exists():
+        df = pd.read_csv(RES / "tracking.csv")
+        tests = paired_tests(df, "family", "rmse_pos")
+        rows = []
+        for fam in dict.fromkeys(df.family):
+            d = df[df.family == fam]
+            med = [d[d.variant == v].rmse_pos.median() for v in TRACKERS]
+            ft = tests[tests.family == fam] if len(tests) else tests
+            diff = ft.filter(like="median diff").iloc[:, 0] if len(ft) else pd.Series(dtype=float)
+            better_all = len(ft) == 3 and bool((ft.significant & (diff < 0)).all())
+            worse_any = bool((ft.significant & (diff > 0)).any()) if len(ft) else False
+            cells = _bold_min(med, mm)
+            cells[0] += "$^{*}$" if better_all else ("$^{\\dagger}$" if worse_any else "")
+            mx = [d[d.variant == v].max_pos.median() for v in TRACKERS]
+            rows.append([fam.replace("_", " ")] + cells + _bold_min(mx, mm))
+        _tex_table(REPORT / "tables" / "tracking.tex",
+                   "Obstacle-free tracking: median position RMSE and median max error over 30 paired seeds "
+                   "(mm, $t\\in[5\\,\\mathrm{s},T_{\\mathrm{ref}}]$). Best in bold.",
+                   "tab:tracking", "l" + "r" * 8,
+                   "& \\multicolumn{4}{c}{RMSE [mm]} & \\multicolumn{4}{c}{max error [mm]} \\\\\n"
+                   "\\cmidrule(lr){2-5}\\cmidrule(lr){6-9}\nfamily & NMPC & Kanayama & Samson & SMC & NMPC & Kanayama & Samson & SMC",
+                   rows, "$^{*}$ NMPC significantly better than every baseline; $^{\\dagger}$ at least one baseline significantly better than NMPC (paired Wilcoxon signed-rank, Holm-corrected, $p<0.05$).")
+
+    if (RES / "robustness.csv").exists():
+        df = pd.read_csv(RES / "robustness.csv")
+        names = {"delay_steps": "delay [ms]", "noise": "pose noise $\\sigma$ [mm]", "wheel_sym": "wheel radius error [\\%]",
+                 "wheel_asym": "wheel asymmetry $\\pm$[\\%]", "offset": "initial offset [m]"}
+        scale = {"delay_steps": 100, "noise": 1000, "wheel_sym": 100, "wheel_asym": 100, "offset": 1}
+        vs = TRACKERS + ["nmpc_comp"]
+        rows = []
+        for p in names:
+            for lvl in sorted(df[df.perturbation == p].level.unique()):
+                d = df[(df.perturbation == p) & (df.level == lvl)]
+                med = [d[d.variant == v].rmse_pos.median() if (d.variant == v).any() else np.nan for v in vs]
+                cells = _bold_min(med, lambda v: "--" if not np.isfinite(v) else mm(v))
+                rows.append([names[p], f"{lvl * scale[p]:g}"] + cells)
+        _tex_table(REPORT / "tables" / "robustness.tex",
+                   "Robustness sweeps on random splines: median position RMSE [mm] (30 paired seeds per cell). "
+                   "Perturbations act on the plant only.", "tab:robustness", "llrrrrr",
+                   "perturbation & level & NMPC & Kanayama & Samson & SMC & NMPC + delay comp.", rows)
+
+    if (RES / "obstacles.csv").exists():
+        df = pd.read_csv(RES / "obstacles.csv")
+        order = ["nmpc_cbf", "nmpc_dc", "nmpc_pf", "kanayama_cbfqp", "samson_cbfqp", "smc_cbfqp"]
+        rows = []
+        for v in order:
+            r = [LABELS[v]]
+            for fam in ["random_spline", "point_to_point"]:
+                d = df[(df.family == fam) & (df.variant == v)]
+                r += [f"{100 * d.success.mean():.0f}", f"{int(d.collided.sum())}", f"{100 * d.min_clearance.median():.1f}"]
+            rows.append(r)
+        _tex_table(REPORT / "tables" / "obstacles.tex",
+                   "Obstacle scenarios (2 LiDAR-perceived obstacles, 30 paired seeds per family). Clearance is the "
+                   "median minimum distance between robot footprint and true obstacle boundary.",
+                   "tab:obstacles", "lrrrrrr",
+                   "& \\multicolumn{3}{c}{random spline} & \\multicolumn{3}{c}{point-to-point} \\\\\n"
+                   "\\cmidrule(lr){2-4}\\cmidrule(lr){5-7}\ncontroller & success [\\%] & collisions & clearance [cm] "
+                   "& success [\\%] & collisions & clearance [cm]", rows)
+
+    if (RES / "gamma.csv").exists():
+        df = pd.read_csv(RES / "gamma.csv")
+        rows = []
+        for (mode, g), d in df.groupby(["mode", "gamma"], dropna=False):
+            r = [mode.upper() + ("" if pd.isna(g) else f", $\\gamma={g:g}$")]
+            for N in (10, 20):
+                dn = d[d.N == N]
+                r += [f"{100 * dn.min_clearance.median():.1f}", f"{100 * dn.success.mean():.0f}",
+                      f"{dn.solve_p95_ms.median():.1f}"]
+            rows.append(r)
+        _tex_table(REPORT / "tables" / "gamma.tex",
+                   "Obstacle-constraint ablation (point-to-point, 2 obstacles): median clearance, success rate and "
+                   "median per-run p95 solve time. $\\gamma=1$ recovers the distance constraint.",
+                   "tab:gamma", "lrrrrrr",
+                   "& \\multicolumn{3}{c}{$N=10$} & \\multicolumn{3}{c}{$N=20$} \\\\\n"
+                   "\\cmidrule(lr){2-4}\\cmidrule(lr){5-7}\narm & clear. [cm] & succ. [\\%] & p95 [ms] "
+                   "& clear. [cm] & succ. [\\%] & p95 [ms]", rows)
+
+    if (TAB / "solve_time.md").exists() and (RES / "traces" / "timing.npz").exists():
+        tr = np.load(RES / "traces" / "timing.npz", allow_pickle=True)
+        groups: dict = {}
+        for key in tr.files:
+            parts = dict(kv.split("=", 1) for kv in key.split("__"))
+            groups.setdefault((LABELS[parts["variant"]], int(parts.get("N", 20))), []).append(
+                1e3 * tr[key].item()["solve_time"][1:])
+        rows = []
+        for (lab, N), arrs in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+            x = np.concatenate(arrs)
+            rows.append([lab, str(N), str(len(x))] + [f"{v:.1f}" for v in
+                        (x.mean(), np.median(x), np.percentile(x, 95), np.percentile(x, 99), x.max())]
+                        + [f"{100 * np.mean(x > 100):.1f}"])
+        cpu = "Intel i5-1240P"
+        _tex_table(REPORT / "tables" / "solve_time.tex",
+                   f"Warm-started NMPC solve times (IPOPT, serial, {cpu}); first (cold) solve excluded. "
+                   "Random splines, 2 obstacles for CBF rows.", "tab:solvetime", "lrrrrrrrr",
+                   "configuration & $N$ & solves & mean & median & p95 & p99 & max [ms] & misses [\\%]", rows)
+
+    tuned = RES / "tuned_gains.json"
+    if tuned.exists():
+        import json
+        t = json.loads(tuned.read_text())
+        def fmt_param(p, v):
+            return "$" + p.replace("_", r"\_") + f"={v:g}$"
+
+        rows = [[LABELS[k], ", ".join(fmt_param(p, v) for p, v in b["params"].items()),
+                 f"{1e3 * b['median_rmse']:.2f}"] for k, b in t.items()]
+        _tex_table(REPORT / "tables" / "tuned_gains.tex",
+                   "Frozen gains after equal-budget tuning (24 candidates per controller, held-out seeds).",
+                   "tab:gains", "llr", "controller & tuned parameters & tuning RMSE [mm]", rows)
+
+
 def main():
     for name, fn in [("tracking", tracking), ("robustness", robustness), ("obstacles", obstacles),
                      ("horizon", horizon), ("gamma", gamma), ("timing", timing)]:
@@ -358,6 +497,8 @@ def main():
             fn()
         else:
             print(f"[{name}] skipped (no results/{name}.csv)")
+    print("[report assets]")
+    report_assets()
 
 
 if __name__ == "__main__":

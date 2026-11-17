@@ -4,7 +4,7 @@
   <name>tb3_mpc</name>
   <version>0.1.0</version>
   <description>Nonlinear MPC trajectory tracking with LiDAR-based obstacle avoidance for TurtleBot3 Burger (AR-521 project), with Kanayama / Samson / SMC baselines.</description>
-  <maintainer email="noreply@example.com">ctrl-foxtrot</maintainer>
+  <maintainer email="b23173@students.iitmandi.ac.in">Rishang Yadav</maintainer>
   <license>MIT</license>
 
   <exec_depend>rclpy</exec_depend>

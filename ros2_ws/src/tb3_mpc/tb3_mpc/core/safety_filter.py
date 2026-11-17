@@ -35,9 +35,10 @@ class CBFSafetyFilter:
                 g.append(sv * u[0] + sw * a * u[1])
         qp = {"x": u, "f": ca.mtimes([(u - un).T, W, (u - un)]), "g": ca.vertcat(*g),
               "p": ca.vertcat(ca.vec(A), un)}
-        self.solver = ca.qpsol("cbf_qp", "osqp", qp, {
-            "error_on_fail": False,
-            "osqp": {"verbose": False, "eps_abs": 1e-6, "eps_rel": 1e-6, "polish": True},
+        # CasADi's built-in active-set QP: no external library (a ROS-sourced
+        # environment can shadow CasADi's bundled OSQP with an incompatible version).
+        self.solver = ca.qpsol("cbf_qp", "qrqp", qp, {
+            "error_on_fail": False, "print_iter": False, "print_header": False, "print_info": False,
         })
 
     def filter(self, x: np.ndarray, u_nom: np.ndarray, obstacles) -> tuple[np.ndarray, dict]:

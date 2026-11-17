@@ -1,0 +1,28 @@
+\begin{table}[t]
+\centering\small
+\caption{Robustness sweeps on random splines: median position RMSE [mm] (30 paired seeds per cell). Perturbations act on the plant only.}\label{tab:robustness}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrrrrr}
+\toprule
+perturbation & level & NMPC & Kanayama & Samson & SMC & NMPC + delay comp. \\
+\midrule
+delay [ms] & 0 & \textbf{0.15} & 0.60 & 0.68 & 0.24 & -- \\
+delay [ms] & 100 & 0.60 & 1.55 & 1.40 & 1.90 & \textbf{0.15} \\
+delay [ms] & 200 & 1.69 & 16.80 & 2.71 & 7.87 & \textbf{0.16} \\
+delay [ms] & 400 & 246.09 & 266.71 & 119.93 & 58.87 & \textbf{0.18} \\
+pose noise $\sigma$ [mm] & 0 & \textbf{0.15} & 0.60 & 0.68 & 0.24 & -- \\
+pose noise $\sigma$ [mm] & 5 & 3.20 & \textbf{2.37} & 2.98 & 3.72 & -- \\
+pose noise $\sigma$ [mm] & 10 & 6.57 & \textbf{4.85} & 5.90 & 7.15 & -- \\
+pose noise $\sigma$ [mm] & 20 & 14.06 & \textbf{12.06} & 12.25 & 14.09 & -- \\
+wheel radius error [\%] & 0 & \textbf{0.15} & 0.60 & 0.68 & 0.24 & -- \\
+wheel radius error [\%] & 5 & 1.83 & 4.35 & 2.06 & \textbf{1.46} & -- \\
+wheel radius error [\%] & 10 & 3.46 & 9.20 & 4.24 & \textbf{3.07} & -- \\
+wheel asymmetry $\pm$[\%] & 0 & \textbf{0.15} & 0.60 & 0.68 & 0.24 & -- \\
+wheel asymmetry $\pm$[\%] & 2 & 2.64 & 1.39 & 2.17 & \textbf{0.39} & -- \\
+wheel asymmetry $\pm$[\%] & 5 & 6.59 & 3.16 & 5.17 & \textbf{0.79} & -- \\
+initial offset [m] & 0.1 & \textbf{0.14} & 0.58 & 0.64 & 0.23 & -- \\
+initial offset [m] & 0.2 & \textbf{0.15} & 0.60 & 0.69 & 0.24 & -- \\
+initial offset [m] & 0.4 & \textbf{0.22} & 4.91 & 1.74 & 20.67 & -- \\
+\bottomrule
+\end{tabular}}
+\end{table}

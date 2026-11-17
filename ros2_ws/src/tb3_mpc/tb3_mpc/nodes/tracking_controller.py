@@ -109,6 +109,7 @@ class TrackingController(Node):
         self.cmd_hist = deque(maxlen=50)  # (time_sec, u) commands sent
         self.u_sent = np.zeros(2)
         self.state = "waiting"
+        self.done = False
         self.t_first_odom = None
         self.t0 = None
         self.actual_xy = deque(maxlen=3000)
@@ -246,8 +247,8 @@ class TrackingController(Node):
             self.state = "finished"
             self.stop()
             self.get_logger().info(f"finished; log: {self.csv_path}")
-            if self.get_parameter("exit_on_finish").value:
-                raise SystemExit
+            # (raising inside a MultiThreadedExecutor callback is swallowed; main() polls this flag)
+            self.done = bool(self.get_parameter("exit_on_finish").value)
             return
 
         # ---- watchdogs
@@ -316,7 +317,8 @@ def main(args=None):
     executor = MultiThreadedExecutor(num_threads=3)
     executor.add_node(node)
     try:
-        executor.spin()
+        while rclpy.ok() and not node.done:
+            executor.spin_once(timeout_sec=0.1)
     except (KeyboardInterrupt, SystemExit):
         pass
     finally:

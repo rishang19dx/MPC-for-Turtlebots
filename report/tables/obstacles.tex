@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering\small
+\caption{Obstacle scenarios (2 LiDAR-perceived obstacles, 30 paired seeds per family). Clearance is the median minimum distance between robot footprint and true obstacle boundary.}\label{tab:obstacles}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{3}{c}{random spline} & \multicolumn{3}{c}{point-to-point} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+controller & success [\%] & collisions & clearance [cm] & success [\%] & collisions & clearance [cm] \\
+\midrule
+NMPC-CBF & 100 & 0 & 6.5 & 100 & 0 & 6.7 \\
+NMPC-DC & 100 & 0 & 5.6 & 100 & 0 & 5.7 \\
+NMPC-PF & 100 & 0 & 13.2 & 100 & 0 & 13.0 \\
+Kanayama + CBF-QP & 53 & 0 & 6.8 & 0 & 0 & 7.4 \\
+Samson + CBF-QP & 57 & 0 & 6.9 & 0 & 0 & 7.3 \\
+SMC + CBF-QP & 50 & 0 & 7.1 & 7 & 0 & 7.4 \\
+\bottomrule
+\end{tabular}}
+\end{table}

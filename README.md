@@ -16,6 +16,48 @@ Samson/backstepping, sliding mode), all held to the same fairness rules.
 | Controllers | NMPC (none / DC / CBF / potential-field obstacle arms) · Kanayama · Samson ≡ kinematic backstepping · kinematic SMC · CBF-QP safety filter for baselines |
 | Sensing | `/odom` (encoders + IMU heading) for state feedback · `/scan` → segmented circles → `/obstacles` |
 
+## Demo
+
+| Gazebo: NMPC-CBF, figure-8 with two obstacles (2× speed) | Gazebo: SMC + CBF-QP filter, same scenario (2× speed) |
+|:---:|:---:|
+| ![NMPC in Gazebo](media/gazebo_nmpc_figure8.gif) | ![SMC+CBF-QP in Gazebo](media/gazebo_smc_cbfqp_figure8.gif) |
+
+| NMPC-CBF: predicted horizon and LiDAR-perceived (inflated) obstacles (3× speed) |
+|:---:|
+| ![NMPC horizon](media/nmpc_horizon.gif) |
+
+| Same scenario, same LiDAR, same limits: NMPC vs baselines + CBF-QP filter (3× speed) |
+|:---:|
+| ![Obstacle comparison](media/obstacle_compare.gif) |
+
+| 300 ms input delay: NMPC with/without delay compensation vs baselines (3× speed) |
+|:---:|
+| ![Delay comparison](media/delay_compare.gif) |
+
+"Long-exposure" composites of the two Gazebo runs (`experiments/trail_still.sh`):
+
+| NMPC-CBF completes the figure-8 around both obstacles | SMC + CBF-QP stalls, cuts across, then stops at the second obstacle |
+|:---:|:---:|
+| ![NMPC trail](media/gazebo_nmpc_figure8.png) | ![SMC trail](media/gazebo_smc_cbfqp_figure8.png) |
+
+Full-resolution MP4s are in [media/](media/). The Gazebo clips are regenerated
+by `experiments/record_gazebo.sh` and the plots by `experiments/make_animations.py`.
+
+## Results at a glance
+
+These come from the kinematic simulator, with 30 paired seeds per cell. Full
+tables are in [results/tables/](results/tables/) and figures in
+[results/figures/](results/figures/).
+
+| Question | Finding |
+|---|---|
+| Obstacle avoidance | **NMPC (CBF, DC or PF constraints): 100% success, 0 collisions** in 60 LiDAR-perceived scenarios. The baselines behind a CBF-QP filter never collide either, but they **deadlock in 43–100%** of runs. |
+| Obstacle-free tracking | NMPC is significantly best (paired Wilcoxon test, Holm-corrected) on references with varying curvature or stops: Lissajous, random splines and point-to-point. Kanayama wins on the circle and SMC on the figure-8. Every controller is accurate to well under 1 mm. |
+| Input delay | Delay is the dominant failure mode for every controller. **NMPC with delay compensation stays at 0.2 mm RMSE up to 400 ms**, while everything else degrades by about 1000×. |
+| Model mismatch and noise | NMPC degrades *faster* than the classical laws under asymmetric wheel-radius error and pose noise. SMC is the most robust to wheel asymmetry. |
+| Computation | Warm-started IPOPT at N = 20 with obstacle constraints takes 10 ms median and 21 ms p99, with **0 missed 100 ms deadlines**. |
+| CBF γ ablation | Smaller γ keeps a larger margin. At γ = 1 the CBF reduces to the distance constraint, as theory predicts. |
+
 ## Repository layout
 
 ```
@@ -48,7 +90,12 @@ EndSemProject/
 │   ├── tune_controllers.py     equal-budget gain tuning on held-out seeds
 │   ├── run_benchmark.py        paired Monte Carlo suites (multiprocess)
 │   ├── analyze.py              tables, Wilcoxon/Holm stats, report figures
-│   └── hw_step_test.py         hardware step test: dead time, lag, sensor rates
+│   ├── hw_step_test.py         hardware step test: dead time, lag, sensor rates
+│   ├── make_animations.py      data-driven MP4/GIF animations
+│   ├── record_gazebo.sh        Gazebo scene-camera recording -> MP4/GIF
+│   └── trail_still.sh          long-exposure still from a recording
+├── media/                      demo GIFs and MP4s
+├── report/                     LaTeX report (main.tex, refs.bib, tables/, figures/)
 └── results/                    generated CSVs, traces, tables, figures
 ```
 

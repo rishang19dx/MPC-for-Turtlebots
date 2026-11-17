@@ -112,11 +112,13 @@ def generate_launch_description():
         DeclareLaunchArgument("exit_on_finish", default_value="false"),
         DeclareLaunchArgument("run_name", default_value=""),
         DeclareLaunchArgument("log_dir", default_value="~/tb3_mpc_logs/sim"),
+        DeclareLaunchArgument("world", default_value=world,
+                              description="world file; share/tb3_mpc/worlds/recording.world saves camera frames"),
     ]
     return LaunchDescription(args + [
         SetEnvironmentVariable("TURTLEBOT3_MODEL", "burger"),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(os.path.join(gazebo_ros, "launch", "gzserver.launch.py")),
-                                 launch_arguments={"world": world}.items()),
+                                 launch_arguments={"world": LaunchConfiguration("world")}.items()),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(os.path.join(gazebo_ros, "launch", "gzclient.launch.py")),
                                  condition=IfCondition(LaunchConfiguration("gui"))),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(

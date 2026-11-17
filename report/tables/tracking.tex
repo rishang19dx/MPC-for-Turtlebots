@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering\small
+\caption{Obstacle-free tracking: median position RMSE and median max error over 30 paired seeds (mm, $t\in[5\,\mathrm{s},T_{\mathrm{ref}}]$). Best in bold.}\label{tab:tracking}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\toprule
+& \multicolumn{4}{c}{RMSE [mm]} & \multicolumn{4}{c}{max error [mm]} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+family & NMPC & Kanayama & Samson & SMC & NMPC & Kanayama & Samson & SMC \\
+\midrule
+circle & 0.09$^{\dagger}$ & \textbf{0.01} & 0.22 & 0.06 & 0.94 & \textbf{0.09} & 1.71 & 0.54 \\
+figure8 & 0.20$^{\dagger}$ & 0.26 & 0.29 & \textbf{0.10} & 4.48 & \textbf{0.41} & 1.75 & 0.61 \\
+sinusoid & 0.50 & 0.74 & 0.78 & \textbf{0.38} & 7.60 & \textbf{1.01} & 3.21 & 2.16 \\
+lissajous & \textbf{0.06}$^{*}$ & 0.27 & 1.74 & 0.47 & \textbf{0.94} & 1.65 & 9.79 & 3.40 \\
+random spline & \textbf{0.15}$^{*}$ & 0.60 & 0.68 & 0.24 & \textbf{0.62} & 4.88 & 4.41 & 2.18 \\
+point to point & \textbf{0.31}$^{*}$ & 1.37 & 1.87 & 0.72 & \textbf{1.05} & 6.02 & 6.70 & 3.97 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\footnotesize $^{*}$ NMPC significantly better than every baseline; $^{\dagger}$ at least one baseline significantly better than NMPC (paired Wilcoxon signed-rank, Holm-corrected, $p<0.05$).
+\end{table}

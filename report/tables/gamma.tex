@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering\small
+\caption{Obstacle-constraint ablation (point-to-point, 2 obstacles): median clearance, success rate and median per-run p95 solve time. $\gamma=1$ recovers the distance constraint.}\label{tab:gamma}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{3}{c}{$N=10$} & \multicolumn{3}{c}{$N=20$} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+arm & clear. [cm] & succ. [\%] & p95 [ms] & clear. [cm] & succ. [\%] & p95 [ms] \\
+\midrule
+CBF, $\gamma=0.05$ & 8.0 & 100 & 36.0 & 7.8 & 100 & 71.3 \\
+CBF, $\gamma=0.1$ & 4.9 & 100 & 29.7 & 4.9 & 100 & 48.1 \\
+CBF, $\gamma=0.2$ & 4.6 & 100 & 29.4 & 4.6 & 100 & 47.2 \\
+CBF, $\gamma=0.3$ & 4.5 & 100 & 30.8 & 4.5 & 100 & 52.9 \\
+CBF, $\gamma=0.5$ & 4.5 & 100 & 30.7 & 4.5 & 100 & 51.7 \\
+CBF, $\gamma=1$ & 4.5 & 100 & 26.3 & 4.5 & 100 & 42.7 \\
+DC & 4.5 & 100 & 31.1 & 4.5 & 100 & 41.6 \\
+PF & 8.0 & 100 & 15.5 & 9.3 & 100 & 17.6 \\
+\bottomrule
+\end{tabular}}
+\end{table}
